@@ -11,7 +11,7 @@ var AppModule = fx.Module("app",
 	LoggerModule,
 
 	// Infrastructure modules
-	DatabaseM
+	DatabaseModule,
 	// Service modules
 	ServicesModule,
 

@@ -14,10 +14,10 @@ import (
 
 // GormLogger adapts our Zap logger to work with GORM
 type GormLogger struct {
-	logger                applogger.Logger
-	logLevel              logger.LogLevel
-	ignoreRecordNotFound  bool
-	slowThreshold         time.Duration
+	logger               applogger.Logger
+	logLevel             logger.LogLevel
+	ignoreRecordNotFound bool
+	slowThreshold        time.Duration
 }
 
 // NewGormLogger creates a new GORM logger adapter

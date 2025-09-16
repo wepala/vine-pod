@@ -28,7 +28,7 @@ func New(cfg *config.Config, logger logger.Logger) (*Server, error) {
 
 	// Setup router with middleware
 	mux := http.NewServeMux()
-	
+
 	// Apply middleware
 	var handler http.Handler = mux
 	handler = middleware.CORS(cfg)(handler)
@@ -38,8 +38,8 @@ func New(cfg *config.Config, logger logger.Logger) (*Server, error) {
 	// Register routes
 	mux.HandleFunc("GET /health", handlers.Health)
 	mux.HandleFunc("GET /version", handlers.Version)
-	mux.HandleFunc("GET /{$}", handlers.Root)  // Use explicit root pattern
-	
+	mux.HandleFunc("GET /{$}", handlers.Root) // Use explicit root pattern
+
 	// Solid protocol routes (placeholder for future implementation)
 	mux.HandleFunc("/solid/", handlers.SolidHandler)
 

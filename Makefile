@@ -44,16 +44,40 @@ build-all:
 run: build
 	./$(BIN_DIR)/$(APP_NAME)
 
-# Run tests
+# Run all tests
 .PHONY: test
 test:
 	go test -v ./...
+
+# Run unit tests only
+.PHONY: test-unit
+test-unit:
+	go test -v ./internal/... ./pkg/...
+
+# Run BDD tests
+.PHONY: test-bdd
+test-bdd:
+	@if [ -d "test/features" ]; then \
+		go test -v ./test/; \
+	else \
+		echo "No BDD features found in test/features/"; \
+	fi
+
+# Run integration tests
+.PHONY: test-integration
+test-integration:
+	go test -v -tags=integration ./test/integration/...
 
 # Run tests with coverage
 .PHONY: test-cover
 test-cover:
 	go test -v -coverprofile=coverage.out ./...
 	go tool cover -html=coverage.out -o coverage.html
+
+# Generate mocks using moq
+.PHONY: generate-mocks
+generate-mocks:
+	go generate ./...
 
 # Run linter
 .PHONY: lint
@@ -107,21 +131,34 @@ dev-setup:
 		echo "Installing golangci-lint..."; \
 		go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest; \
 	fi
+	@if ! command -v godog >/dev/null 2>&1; then \
+		echo "Installing godog..."; \
+		go install github.com/cucumber/godog/cmd/godog@latest; \
+	fi
+
+# TDD workflow (format, lint, and test)
+.PHONY: dev-test
+dev-test: fmt lint test
 
 # Show help
 .PHONY: help
 help:
 	@echo "Available targets:"
-	@echo "  build        - Build the application"
-	@echo "  build-all    - Build for multiple platforms"
-	@echo "  run          - Build and run the application"
-	@echo "  test         - Run tests"
-	@echo "  test-cover   - Run tests with coverage"
-	@echo "  lint         - Run linter"
-	@echo "  fmt          - Format code"
-	@echo "  tidy         - Tidy dependencies"
-	@echo "  clean        - Clean build artifacts"
-	@echo "  docker-build - Build Docker image"
-	@echo "  docker-run   - Build and run Docker container"
-	@echo "  dev-setup    - Setup development environment"
-	@echo "  help         - Show this help message"
+	@echo "  build            - Build the application"
+	@echo "  build-all        - Build for multiple platforms"
+	@echo "  run              - Build and run the application"
+	@echo "  test             - Run all tests"
+	@echo "  test-unit        - Run unit tests only"
+	@echo "  test-bdd         - Run BDD tests"
+	@echo "  test-integration - Run integration tests"
+	@echo "  test-cover       - Run tests with coverage"
+	@echo "  generate-mocks   - Generate mocks using moq"
+	@echo "  lint             - Run linter"
+	@echo "  fmt              - Format code"
+	@echo "  tidy             - Tidy dependencies"
+	@echo "  clean            - Clean build artifacts"
+	@echo "  docker-build     - Build Docker image"
+	@echo "  docker-run       - Build and run Docker container"
+	@echo "  dev-setup        - Setup development environment"
+	@echo "  dev-test         - TDD workflow (format, lint, test)"
+	@echo "  help             - Show this help message"

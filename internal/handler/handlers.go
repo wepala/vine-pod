@@ -28,13 +28,15 @@ func New(cfg *config.Config, logger logger.Logger) *Handlers {
 // Health handles health check requests
 func (h *Handlers) Health(w http.ResponseWriter, r *http.Request) {
 	response := map[string]string{
-		"status": "healthy",
+		"status":  "healthy",
 		"service": "vine-pod",
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(response)
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		h.logger.Error("Failed to encode health response", zap.Error(err))
+	}
 }
 
 // Version handles version information requests
@@ -43,7 +45,9 @@ func (h *Handlers) Version(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(versionInfo)
+	if err := json.NewEncoder(w).Encode(versionInfo); err != nil {
+		h.logger.Error("Failed to encode version response", zap.Error(err))
+	}
 }
 
 // Root handles root path requests
@@ -60,7 +64,9 @@ func (h *Handlers) Root(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(response)
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		h.logger.Error("Failed to encode root response", zap.Error(err))
+	}
 }
 
 // SolidHandler handles Solid protocol requests (placeholder)
@@ -82,5 +88,7 @@ func (h *Handlers) SolidHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusNotImplemented)
-	json.NewEncoder(w).Encode(response)
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		h.logger.Error("Failed to encode solid response", zap.Error(err))
+	}
 }
