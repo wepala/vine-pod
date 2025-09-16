@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"go.uber.org/zap"
+
 	"github.com/wepala/vine-pod/internal/config"
 	"github.com/wepala/vine-pod/pkg/logger"
 	"github.com/wepala/vine-pod/pkg/version"
@@ -63,10 +65,10 @@ func (h *Handlers) Root(w http.ResponseWriter, r *http.Request) {
 
 // SolidHandler handles Solid protocol requests (placeholder)
 func (h *Handlers) SolidHandler(w http.ResponseWriter, r *http.Request) {
-	h.logger.Info("Solid protocol request received", 
-		"method", r.Method, 
-		"path", r.URL.Path,
-		"user_agent", r.Header.Get("User-Agent"),
+	h.logger.Info("Solid protocol request received",
+		zap.String("method", r.Method),
+		zap.String("path", r.URL.Path),
+		zap.String("user_agent", r.Header.Get("User-Agent")),
 	)
 
 	// This is a placeholder for future Solid protocol implementation

@@ -1129,6 +1129,20 @@ graph LR
     ADMIN --> AU[Audit Logs]
 ```
 
+## Implementation Tasks
+
+The detailed implementation tasks for this design are maintained in a separate document: [IMPLEMENTATION_TASKS.md](IMPLEMENTATION_TASKS.md)
+
+This task list contains:
+- **95+ main tasks** with **200+ sub-tasks**
+- Tasks organized by architectural layers (Domain, Application, Infrastructure)
+- Comprehensive tagging for GitHub issue management
+- Alignment with user stories and requirements (R001-R043)
+- Definition of done criteria for each task
+- Story completion tracking guidelines
+
+The tasks are designed to be imported directly into GitHub Issues with proper labels, milestones, and project organization.
+
 ## Infrastructure Layer Design
 
 ### HTTP Layer (Kratos)

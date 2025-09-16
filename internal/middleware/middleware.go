@@ -5,6 +5,8 @@ import (
 	"runtime/debug"
 	"time"
 
+	"go.uber.org/zap"
+
 	"github.com/wepala/vine-pod/internal/config"
 	"github.com/wepala/vine-pod/pkg/logger"
 )
@@ -24,12 +26,12 @@ func Logging(logger logger.Logger) func(http.Handler) http.Handler {
 			// Log the request
 			duration := time.Since(start)
 			logger.Info("HTTP request",
-				"method", r.Method,
-				"path", r.URL.Path,
-				"status", rw.statusCode,
-				"duration", duration.String(),
-				"user_agent", r.Header.Get("User-Agent"),
-				"remote_addr", r.RemoteAddr,
+				zap.String("method", r.Method),
+				zap.String("path", r.URL.Path),
+				zap.Int("status", rw.statusCode),
+				zap.Duration("duration", duration),
+				zap.String("user_agent", r.Header.Get("User-Agent")),
+				zap.String("remote_addr", r.RemoteAddr),
 			)
 		})
 	}
@@ -42,10 +44,10 @@ func Recovery(logger logger.Logger) func(http.Handler) http.Handler {
 			defer func() {
 				if err := recover(); err != nil {
 					logger.Error("Panic recovered",
-						"error", err,
-						"stack", string(debug.Stack()),
-						"method", r.Method,
-						"path", r.URL.Path,
+						zap.Any("error", err),
+						zap.String("stack", string(debug.Stack())),
+						zap.String("method", r.Method),
+						zap.String("path", r.URL.Path),
 					)
 
 					http.Error(w, "Internal Server Error", http.StatusInternalServerError)

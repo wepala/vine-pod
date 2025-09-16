@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"time"
 
+	"go.uber.org/zap"
+
 	"github.com/wepala/vine-pod/internal/config"
 	"github.com/wepala/vine-pod/internal/handler"
 	"github.com/wepala/vine-pod/internal/middleware"
@@ -59,11 +61,11 @@ func New(cfg *config.Config, logger logger.Logger) (*Server, error) {
 
 // Start starts the HTTP server
 func (s *Server) Start(ctx context.Context) error {
-	s.logger.Info("Starting HTTP server", "address", s.server.Addr)
+	s.logger.Info("Starting HTTP server", zap.String("address", s.server.Addr))
 
 	go func() {
 		if err := s.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			s.logger.Error("HTTP server failed", "error", err)
+			s.logger.Error("HTTP server failed", zap.Error(err))
 		}
 	}()
 

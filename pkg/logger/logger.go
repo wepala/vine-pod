@@ -1,67 +1,109 @@
 package logger
 
 import (
-	"log/slog"
-	"os"
 	"strings"
+
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
-// Logger interface defines logging methods
+// Logger interface defines logging methods compatible with Zap
 type Logger interface {
-	Debug(msg string, args ...any)
-	Info(msg string, args ...any)
-	Warn(msg string, args ...any)
-	Error(msg string, args ...any)
-	With(args ...any) Logger
+	Debug(msg string, fields ...zap.Field)
+	Info(msg string, fields ...zap.Field)
+	Warn(msg string, fields ...zap.Field)
+	Error(msg string, fields ...zap.Field)
+	With(fields ...zap.Field) Logger
+	Sync() error
+	GetZapLogger() *zap.Logger // Add method to access underlying zap logger
 }
 
-// slogLogger wraps slog.Logger to implement our Logger interface
-type slogLogger struct {
-	logger *slog.Logger
+// zapLogger wraps zap.Logger to implement our Logger interface
+type zapLogger struct {
+	logger *zap.Logger
 }
 
-// New creates a new logger with the specified level
+// New creates a new Zap logger with the specified level
 func New(level string) Logger {
-	var logLevel slog.Level
+	// Parse log level
+	var zapLevel zapcore.Level
 	switch strings.ToLower(level) {
 	case "debug":
-		logLevel = slog.LevelDebug
+		zapLevel = zap.DebugLevel
 	case "info":
-		logLevel = slog.LevelInfo
+		zapLevel = zap.InfoLevel
 	case "warn", "warning":
-		logLevel = slog.LevelWarn
+		zapLevel = zap.WarnLevel
 	case "error":
-		logLevel = slog.LevelError
+		zapLevel = zap.ErrorLevel
 	default:
-		logLevel = slog.LevelInfo
+		zapLevel = zap.InfoLevel
 	}
 
-	opts := &slog.HandlerOptions{
-		Level: logLevel,
+	// Create configuration
+	config := zap.Config{
+		Level:       zap.NewAtomicLevelAt(zapLevel),
+		Development: false,
+		Sampling: &zap.SamplingConfig{
+			Initial:    100,
+			Thereafter: 100,
+		},
+		Encoding:         "json",
+		EncoderConfig:    zap.NewProductionEncoderConfig(),
+		OutputPaths:      []string{"stdout"},
+		ErrorOutputPaths: []string{"stderr"},
 	}
 
-	handler := slog.NewJSONHandler(os.Stdout, opts)
-	logger := slog.New(handler)
+	// Set time format
+	config.EncoderConfig.TimeKey = "timestamp"
+	config.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 
-	return &slogLogger{logger: logger}
+	// Build logger
+	logger, err := config.Build()
+	if err != nil {
+		// Fallback to development logger if production config fails
+		logger, _ = zap.NewDevelopment()
+	}
+
+	return &zapLogger{logger: logger}
 }
 
-func (l *slogLogger) Debug(msg string, args ...any) {
-	l.logger.Debug(msg, args...)
+// NewDevelopment creates a development logger with pretty printing
+func NewDevelopment() Logger {
+	config := zap.NewDevelopmentConfig()
+	config.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
+	logger, err := config.Build()
+	if err != nil {
+		// Ultimate fallback
+		logger = zap.NewNop()
+	}
+	return &zapLogger{logger: logger}
 }
 
-func (l *slogLogger) Info(msg string, args ...any) {
-	l.logger.Info(msg, args...)
+func (l *zapLogger) Debug(msg string, fields ...zap.Field) {
+	l.logger.Debug(msg, fields...)
 }
 
-func (l *slogLogger) Warn(msg string, args ...any) {
-	l.logger.Warn(msg, args...)
+func (l *zapLogger) Info(msg string, fields ...zap.Field) {
+	l.logger.Info(msg, fields...)
 }
 
-func (l *slogLogger) Error(msg string, args ...any) {
-	l.logger.Error(msg, args...)
+func (l *zapLogger) Warn(msg string, fields ...zap.Field) {
+	l.logger.Warn(msg, fields...)
 }
 
-func (l *slogLogger) With(args ...any) Logger {
-	return &slogLogger{logger: l.logger.With(args...)}
+func (l *zapLogger) Error(msg string, fields ...zap.Field) {
+	l.logger.Error(msg, fields...)
+}
+
+func (l *zapLogger) With(fields ...zap.Field) Logger {
+	return &zapLogger{logger: l.logger.With(fields...)}
+}
+
+func (l *zapLogger) Sync() error {
+	return l.logger.Sync()
+}
+
+func (l *zapLogger) GetZapLogger() *zap.Logger {
+	return l.logger
 }

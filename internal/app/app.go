@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"go.uber.org/zap"
+
 	"github.com/wepala/vine-pod/internal/config"
 	"github.com/wepala/vine-pod/internal/server"
 	"github.com/wepala/vine-pod/pkg/logger"
@@ -11,33 +13,33 @@ import (
 
 // App represents the main application
 type App struct {
-	config *config.Config
-	logger logger.Logger
-	server *server.Server
+	config       *config.Config
+	logger       logger.Logger
+	kratosServer *server.SimpleKratosServer
 }
 
 // New creates a new application instance
 func New(cfg *config.Config, logger logger.Logger) (*App, error) {
-	// Create HTTP server
-	srv, err := server.New(cfg, logger)
+	// Create Kratos HTTP server
+	srv, err := server.NewSimpleKratosServer(cfg, logger)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create server: %w", err)
+		return nil, fmt.Errorf("failed to create Kratos server: %w", err)
 	}
 
 	return &App{
-		config: cfg,
-		logger: logger,
-		server: srv,
+		config:       cfg,
+		logger:       logger,
+		kratosServer: srv,
 	}, nil
 }
 
 // Run starts the application
 func (a *App) Run(ctx context.Context) error {
-	a.logger.Info("Starting Vine Pod application", "address", a.config.Address())
+	a.logger.Info("Starting Vine Pod application", zap.String("address", a.config.Address()))
 
-	// Start HTTP server
-	if err := a.server.Start(ctx); err != nil {
-		return fmt.Errorf("failed to start server: %w", err)
+	// Start Kratos HTTP server
+	if err := a.kratosServer.Start(ctx); err != nil {
+		return fmt.Errorf("failed to start Kratos server: %w", err)
 	}
 
 	return nil
@@ -47,9 +49,9 @@ func (a *App) Run(ctx context.Context) error {
 func (a *App) Shutdown(ctx context.Context) error {
 	a.logger.Info("Shutting down application")
 
-	// Shutdown HTTP server
-	if err := a.server.Shutdown(ctx); err != nil {
-		return fmt.Errorf("failed to shutdown server: %w", err)
+	// Shutdown Kratos HTTP server
+	if err := a.kratosServer.Shutdown(ctx); err != nil {
+		return fmt.Errorf("failed to shutdown Kratos server: %w", err)
 	}
 
 	return nil

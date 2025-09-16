@@ -1,0 +1,142 @@
+syntax = "proto3";
+
+package solid.v1;
+
+option go_package = "github.com/wepala/vine-pod/api/solid/v1;v1";
+
+import "google/api/annotations.proto";
+
+// Health service for system health checks
+service Health {
+  // GetHealth returns the health status of the service
+  rpc GetHealth(HealthRequest) returns (HealthReply) {
+    option (google.api.http) = {
+      get: "/health"
+    };
+  }
+}
+
+// Version service for system version information
+service Version {
+  // GetVersion returns the version information of the service
+  rpc GetVersion(VersionRequest) returns (VersionReply) {
+    option (google.api.http) = {
+      get: "/version"
+    };
+  }
+}
+
+// Solid service implementing the Solid Protocol
+service Solid {
+  // GetResource retrieves a resource by its URI
+  rpc GetResource(GetResourceRequest) returns (GetResourceReply) {
+    option (google.api.http) = {
+      get: "/solid/{uri=**}"
+    };
+  }
+
+  // CreateResource creates a new resource
+  rpc CreateResource(CreateResourceRequest) returns (CreateResourceReply) {
+    option (google.api.http) = {
+      post: "/solid/{uri=**}"
+      body: "*"
+    };
+  }
+
+  // UpdateResource updates an existing resource
+  rpc UpdateResource(UpdateResourceRequest) returns (UpdateResourceReply) {
+    option (google.api.http) = {
+      put: "/solid/{uri=**}"
+      body: "*"
+    };
+  }
+
+  // DeleteResource deletes a resource
+  rpc DeleteResource(DeleteResourceRequest) returns (DeleteResourceReply) {
+    option (google.api.http) = {
+      delete: "/solid/{uri=**}"
+    };
+  }
+
+  // GetRoot returns the root endpoint information
+  rpc GetRoot(RootRequest) returns (RootReply) {
+    option (google.api.http) = {
+      get: "/"
+    };
+  }
+}
+
+// Health messages
+message HealthRequest {}
+
+message HealthReply {
+  string status = 1;
+  string service = 2;
+}
+
+// Version messages
+message VersionRequest {}
+
+message VersionReply {
+  string version = 1;
+  string commit = 2;
+  string build_time = 3;
+}
+
+// Root messages
+message RootRequest {}
+
+message RootReply {
+  string message = 1;
+  string version = 2;
+  map<string, string> endpoints = 3;
+}
+
+// Solid Protocol messages
+message GetResourceRequest {
+  string uri = 1;
+  string accept = 2; // Content-Type negotiation
+}
+
+message GetResourceReply {
+  string content = 1;
+  string content_type = 2;
+  string etag = 3;
+  string last_modified = 4;
+  map<string, string> headers = 5;
+}
+
+message CreateResourceRequest {
+  string uri = 1;
+  string content = 2;
+  string content_type = 3;
+  map<string, string> headers = 4;
+}
+
+message CreateResourceReply {
+  string uri = 1;
+  string etag = 2;
+  map<string, string> headers = 3;
+}
+
+message UpdateResourceRequest {
+  string uri = 1;
+  string content = 2;
+  string content_type = 3;
+  string if_match = 4; // ETag for conditional updates
+  map<string, string> headers = 5;
+}
+
+message UpdateResourceReply {
+  string etag = 1;
+  map<string, string> headers = 2;
+}
+
+message DeleteResourceRequest {
+  string uri = 1;
+  string if_match = 2; // ETag for conditional deletes
+}
+
+message DeleteResourceReply {
+  map<string, string> headers = 1;
+}
