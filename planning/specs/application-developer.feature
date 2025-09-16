@@ -33,7 +33,7 @@ Feature: Application Developer Integration
       | Validate user identity   | Verify WebID in token claims     |
     And the authentication should integrate with existing user sessions
 
-  @R038 @webhook-notifications
+  @R038 @R024 @webhook-notifications @notification-of-changes
   Scenario: Receive real-time updates via webhooks
     Given my application processes user data from pods
     When users modify their pod data

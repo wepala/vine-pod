@@ -27,7 +27,7 @@ Feature: Access Control and Permissions
     And only authenticated users with explicit permissions should have access
     And the access control policies should be updated accordingly
 
-  @R032 @permission-granting
+  @R032 @R020 @permission-granting @shared-resource-access
   Scenario: Grant read permission to specific user
     Given I have a private resource at "https://alice.example.com/personal/diary.ttl"
     When I grant read permission to Bob's WebID "https://bob.example.com/profile#me"
@@ -35,7 +35,7 @@ Feature: Access Control and Permissions
     And Bob should receive "200 OK" when requesting the resource
     But Bob should receive "403 Forbidden" when attempting to modify it
 
-  @R032 @permission-granting
+  @R032 @R021 @R022 @permission-granting @collaborative-creation @collaborative-updates
   Scenario: Grant write permission to specific user
     Given I have a resource at "https://alice.example.com/shared/document.ttl"
     When I grant write permission to Bob's WebID "https://bob.example.com/profile#me"
@@ -110,7 +110,7 @@ Feature: Access Control and Permissions
     And new group members should automatically inherit the permissions
     And removing someone from the group should revoke their access
 
-  @access-control-discovery @R019
+  @access-control-discovery @R019 @R026 @access-level-awareness
   Scenario: Discover access control information
     Given I have a resource with specific access controls
     When an authenticated user queries the access control information
