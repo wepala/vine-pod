@@ -10,6 +10,7 @@ import (
 // Config holds all configuration for the application
 type Config struct {
 	Server   ServerConfig
+	Database DatabaseConfig
 	LogLevel string
 	Solid    SolidConfig
 }
@@ -21,6 +22,16 @@ type ServerConfig struct {
 	ReadTimeout  time.Duration
 	WriteTimeout time.Duration
 	IdleTimeout  time.Duration
+}
+
+// DatabaseConfig holds database configuration
+type DatabaseConfig struct {
+	Driver          string        // "postgres" or "sqlite"
+	DSN             string        // Data Source Name
+	MaxOpenConns    int           // Maximum open connections
+	MaxIdleConns    int           // Maximum idle connections
+	ConnMaxLifetime time.Duration // Connection maximum lifetime
+	ConnMaxIdleTime time.Duration // Connection maximum idle time
 }
 
 // SolidConfig holds Solid protocol specific configuration
@@ -39,6 +50,14 @@ func Load() (*Config, error) {
 			ReadTimeout:  getEnvDuration("SERVER_READ_TIMEOUT", "30s"),
 			WriteTimeout: getEnvDuration("SERVER_WRITE_TIMEOUT", "30s"),
 			IdleTimeout:  getEnvDuration("SERVER_IDLE_TIMEOUT", "60s"),
+		},
+		Database: DatabaseConfig{
+			Driver:          getEnv("DB_DRIVER", "sqlite"),
+			DSN:             getEnv("DB_DSN", "./data/vine-pod.db"),
+			MaxOpenConns:    getEnvInt("DB_MAX_OPEN_CONNS", 25),
+			MaxIdleConns:    getEnvInt("DB_MAX_IDLE_CONNS", 25),
+			ConnMaxLifetime: getEnvDuration("DB_CONN_MAX_LIFETIME", "5m"),
+			ConnMaxIdleTime: getEnvDuration("DB_CONN_MAX_IDLE_TIME", "5m"),
 		},
 		LogLevel: getEnv("LOG_LEVEL", "info"),
 		Solid: SolidConfig{

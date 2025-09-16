@@ -10,6 +10,8 @@ var AppModule = fx.Module("app",
 	ConfigModule,
 	LoggerModule,
 
+	// Infrastructure modules
+	DatabaseM
 	// Service modules
 	ServicesModule,
 

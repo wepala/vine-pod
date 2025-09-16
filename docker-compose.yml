@@ -15,6 +15,14 @@ services:
       - SERVER_HOST=0.0.0.0
       - SERVER_PORT=8080
       - LOG_LEVEL=info
+      # Database configuration - uses SQLite by default
+      - DB_DRIVER=sqlite
+      - DB_DSN=/app/data/vine-pod.db
+      - DB_MAX_OPEN_CONNS=25
+      - DB_MAX_IDLE_CONNS=25
+      - DB_CONN_MAX_LIFETIME=5m
+      - DB_CONN_MAX_IDLE_TIME=5m
+      # Solid Protocol configuration
       - SOLID_DATA_PATH=/app/data
       - SOLID_ENABLE_CORS=true
     volumes:
@@ -26,6 +34,61 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+    depends_on:
+      - postgres
+      - redis
+
+  # PostgreSQL database for development
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: vine_pod
+      POSTGRES_USER: vine_pod
+      POSTGRES_PASSWORD: vine_pod_dev_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vine_pod"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis for caching and session storage
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # pgAdmin for database administration (optional)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@vine-pod.local
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    profiles:
+      - admin
 
 volumes:
   vine_data:
+  postgres_data:
+  redis_data:
+  pgadmin_data:

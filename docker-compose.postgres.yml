@@ -1,0 +1,16 @@
+# Docker Compose override for PostgreSQL development
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.postgres.yml up
+
+version: '3.8'
+
+services:
+  vine-pod:
+    environment:
+      # Override to use PostgreSQL instead of SQLite
+      - DB_DRIVER=postgres
+      - DB_DSN=postgresql://vine_pod:vine_pod_dev_password@postgres:5432/vine_pod?sslmode=disable
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
