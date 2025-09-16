@@ -1,10 +1,10 @@
-package fx
+package di
 
 import (
 	"go.uber.org/fx"
 
-	"github.com/wepala/vine-pod/internal/config"
-	"github.com/wepala/vine-pod/internal/service"
+	"github.com/wepala/vine-pod/internal/application/service"
+	"github.com/wepala/vine-pod/internal/infrastructure/config"
 	"github.com/wepala/vine-pod/pkg/logger"
 )
 

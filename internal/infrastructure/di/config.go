@@ -1,9 +1,9 @@
-package fx
+package di
 
 import (
 	"go.uber.org/fx"
 
-	"github.com/wepala/vine-pod/internal/config"
+	"github.com/wepala/vine-pod/internal/infrastructure/config"
 )
 
 // ConfigModule provides configuration-related dependencies

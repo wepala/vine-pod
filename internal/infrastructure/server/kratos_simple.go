@@ -12,8 +12,8 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/wepala/vine-pod/internal/config"
-	"github.com/wepala/vine-pod/internal/service"
+	"github.com/wepala/vine-pod/internal/application/service"
+	"github.com/wepala/vine-pod/internal/in
 	"github.com/wepala/vine-pod/pkg/logger"
 )
 

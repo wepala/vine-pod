@@ -1,4 +1,4 @@
-package fx
+package di
 
 import (
 	"go.uber.org/fx"

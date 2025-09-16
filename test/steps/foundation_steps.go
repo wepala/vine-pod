@@ -12,9 +12,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/fx"
 
-	"github.com/wepala/vine-pod/internal/config"
-	fxmodules "github.com/wepala/vine-pod/internal/fx"
-	"github.com/wepala/vine-pod/internal/handler"
+	"github.com/wepala/vine-pod/internal/application/handler"
+
+	"github.com/wepala/vine-pod/internal/infrastructure/config"
+	"github.com/wepala/vine-pod/internal/application/handler"
 	"github.com/wepala/vine-pod/pkg/logger"
 )
 

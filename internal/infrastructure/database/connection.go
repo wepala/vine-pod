@@ -11,7 +11,7 @@ import (
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 
-	"github.com/wepala/vine-pod/internal/config"
+	"github.com/wepala/vine-pod/internal/infrastructure/config"
 	applogger "github.com/wepala/vine-pod/pkg/logger"
 )
 

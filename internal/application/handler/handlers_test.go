@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/wepala/vine-pod/internal/config"
+	"github.com/wepala/vine-pod/internal/infrastructure/config"
 	"github.com/wepala/vine-pod/pkg/logger"
 	"github.com/wepala/vine-pod/pkg/version"
 )

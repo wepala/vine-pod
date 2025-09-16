@@ -7,7 +7,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	fxmodules "github.com/wepala/vine-pod/internal/fx"
+	fxmodules "github.com/wepala/vine-pod/internal/infrastructure/di"
 	"github.com/wepala/vine-pod/pkg/version"
 )
 

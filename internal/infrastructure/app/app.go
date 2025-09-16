@@ -6,8 +6,8 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/wepala/vine-pod/internal/config"
-	"github.com/wepala/vine-pod/internal/server"
+	"github.com/wepala/vine-pod/internal/infrastructure/config"
+	"github.com/wepala/vine-pod/internal/infrastructure/server"
 	"github.com/wepala/vine-pod/pkg/logger"
 )
 

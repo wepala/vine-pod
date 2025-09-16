@@ -6,7 +6,7 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/wepala/vine-pod/internal/config"
+	"github.com/wepala/vine-pod/internal/infrastructure/config"
 	"github.com/wepala/vine-pod/pkg/logger"
 	"github.com/wepala/vine-pod/pkg/version"
 )

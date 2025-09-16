@@ -1,4 +1,4 @@
-package fx
+package di
 
 import (
 	"context"
@@ -7,8 +7,8 @@ import (
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 
-	"github.com/wepala/vine-pod/internal/config"
-	"github.com/wepala/vine-pod/internal/database"
+	"github.com/wepala/vine-pod/internal/infrastructure/config"
+	"github.com/wepala/vine-pod/internal/infrastructure/database"
 	"github.com/wepala/vine-pod/pkg/logger"
 )
 
