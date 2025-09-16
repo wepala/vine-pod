@@ -5,6 +5,8 @@ package repository
 
 import (
 	"context"
+	"github.com/wepala/vine-os/core/pericarp/pkg/domain"
+	"github.com/wepala/vine-pod/internal/domain/entity"
 	"sync"
 )
 
@@ -18,26 +20,29 @@ var _ ResourceRepository = &ResourceRepositoryMock{}
 //
 //		// make and configure a mocked ResourceRepository
 //		mockedResourceRepository := &ResourceRepositoryMock{
-//			CreateFunc: func(ctx context.Context, resource *Resource) error {
-//				panic("mock out the Create method")
-//			},
 //			DeleteFunc: func(ctx context.Context, id string) error {
 //				panic("mock out the Delete method")
 //			},
-//			FindByContainerFunc: func(ctx context.Context, containerURI string) ([]*Resource, error) {
+//			FindByContainerFunc: func(ctx context.Context, containerURI string) ([]entity.Resource, error) {
 //				panic("mock out the FindByContainer method")
 //			},
-//			GetByIDFunc: func(ctx context.Context, id string) (*Resource, error) {
+//			GetByIDFunc: func(ctx context.Context, id string) (entity.Resource, error) {
 //				panic("mock out the GetByID method")
 //			},
-//			GetByURIFunc: func(ctx context.Context, uri string) (*Resource, error) {
+//			GetByURIFunc: func(ctx context.Context, uri string) (entity.Resource, error) {
 //				panic("mock out the GetByURI method")
 //			},
-//			ListFunc: func(ctx context.Context, limit int, offset int) ([]*Resource, error) {
+//			ListFunc: func(ctx context.Context, limit int, offset int) ([]entity.Resource, error) {
 //				panic("mock out the List method")
 //			},
-//			UpdateFunc: func(ctx context.Context, resource *Resource) error {
-//				panic("mock out the Update method")
+//			LoadEventsFunc: func(ctx context.Context, aggregateID string) ([]domain.Event, error) {
+//				panic("mock out the LoadEvents method")
+//			},
+//			LoadEventsFromVersionFunc: func(ctx context.Context, aggregateID string, version int) ([]domain.Event, error) {
+//				panic("mock out the LoadEventsFromVersion method")
+//			},
+//			SaveFunc: func(ctx context.Context, resource entity.Resource) error {
+//				panic("mock out the Save method")
 //			},
 //		}
 //
@@ -46,36 +51,32 @@ var _ ResourceRepository = &ResourceRepositoryMock{}
 //
 //	}
 type ResourceRepositoryMock struct {
-	// CreateFunc mocks the Create method.
-	CreateFunc func(ctx context.Context, resource *Resource) error
-
 	// DeleteFunc mocks the Delete method.
 	DeleteFunc func(ctx context.Context, id string) error
 
 	// FindByContainerFunc mocks the FindByContainer method.
-	FindByContainerFunc func(ctx context.Context, containerURI string) ([]*Resource, error)
+	FindByContainerFunc func(ctx context.Context, containerURI string) ([]entity.Resource, error)
 
 	// GetByIDFunc mocks the GetByID method.
-	GetByIDFunc func(ctx context.Context, id string) (*Resource, error)
+	GetByIDFunc func(ctx context.Context, id string) (entity.Resource, error)
 
 	// GetByURIFunc mocks the GetByURI method.
-	GetByURIFunc func(ctx context.Context, uri string) (*Resource, error)
+	GetByURIFunc func(ctx context.Context, uri string) (entity.Resource, error)
 
 	// ListFunc mocks the List method.
-	ListFunc func(ctx context.Context, limit int, offset int) ([]*Resource, error)
+	ListFunc func(ctx context.Context, limit int, offset int) ([]entity.Resource, error)
 
-	// UpdateFunc mocks the Update method.
-	UpdateFunc func(ctx context.Context, resource *Resource) error
+	// LoadEventsFunc mocks the LoadEvents method.
+	LoadEventsFunc func(ctx context.Context, aggregateID string) ([]domain.Event, error)
+
+	// LoadEventsFromVersionFunc mocks the LoadEventsFromVersion method.
+	LoadEventsFromVersionFunc func(ctx context.Context, aggregateID string, version int) ([]domain.Event, error)
+
+	// SaveFunc mocks the Save method.
+	SaveFunc func(ctx context.Context, resource entity.Resource) error
 
 	// calls tracks calls to the methods.
 	calls struct {
-		// Create holds details about calls to the Create method.
-		Create []struct {
-			// Ctx is the ctx argument value.
-			Ctx context.Context
-			// Resource is the resource argument value.
-			Resource *Resource
-		}
 		// Delete holds details about calls to the Delete method.
 		Delete []struct {
 			// Ctx is the ctx argument value.
@@ -113,57 +114,38 @@ type ResourceRepositoryMock struct {
 			// Offset is the offset argument value.
 			Offset int
 		}
-		// Update holds details about calls to the Update method.
-		Update []struct {
+		// LoadEvents holds details about calls to the LoadEvents method.
+		LoadEvents []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// AggregateID is the aggregateID argument value.
+			AggregateID string
+		}
+		// LoadEventsFromVersion holds details about calls to the LoadEventsFromVersion method.
+		LoadEventsFromVersion []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// AggregateID is the aggregateID argument value.
+			AggregateID string
+			// Version is the version argument value.
+			Version int
+		}
+		// Save holds details about calls to the Save method.
+		Save []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 			// Resource is the resource argument value.
-			Resource *Resource
+			Resource entity.Resource
 		}
 	}
-	lockCreate          sync.RWMutex
-	lockDelete          sync.RWMutex
-	lockFindByContainer sync.RWMutex
-	lockGetByID         sync.RWMutex
-	lockGetByURI        sync.RWMutex
-	lockList            sync.RWMutex
-	lockUpdate          sync.RWMutex
-}
-
-// Create calls CreateFunc.
-func (mock *ResourceRepositoryMock) Create(ctx context.Context, resource *Resource) error {
-	if mock.CreateFunc == nil {
-		panic("ResourceRepositoryMock.CreateFunc: method is nil but ResourceRepository.Create was just called")
-	}
-	callInfo := struct {
-		Ctx      context.Context
-		Resource *Resource
-	}{
-		Ctx:      ctx,
-		Resource: resource,
-	}
-	mock.lockCreate.Lock()
-	mock.calls.Create = append(mock.calls.Create, callInfo)
-	mock.lockCreate.Unlock()
-	return mock.CreateFunc(ctx, resource)
-}
-
-// CreateCalls gets all the calls that were made to Create.
-// Check the length with:
-//
-//	len(mockedResourceRepository.CreateCalls())
-func (mock *ResourceRepositoryMock) CreateCalls() []struct {
-	Ctx      context.Context
-	Resource *Resource
-} {
-	var calls []struct {
-		Ctx      context.Context
-		Resource *Resource
-	}
-	mock.lockCreate.RLock()
-	calls = mock.calls.Create
-	mock.lockCreate.RUnlock()
-	return calls
+	lockDelete                sync.RWMutex
+	lockFindByContainer       sync.RWMutex
+	lockGetByID               sync.RWMutex
+	lockGetByURI              sync.RWMutex
+	lockList                  sync.RWMutex
+	lockLoadEvents            sync.RWMutex
+	lockLoadEventsFromVersion sync.RWMutex
+	lockSave                  sync.RWMutex
 }
 
 // Delete calls DeleteFunc.
@@ -203,7 +185,7 @@ func (mock *ResourceRepositoryMock) DeleteCalls() []struct {
 }
 
 // FindByContainer calls FindByContainerFunc.
-func (mock *ResourceRepositoryMock) FindByContainer(ctx context.Context, containerURI string) ([]*Resource, error) {
+func (mock *ResourceRepositoryMock) FindByContainer(ctx context.Context, containerURI string) ([]entity.Resource, error) {
 	if mock.FindByContainerFunc == nil {
 		panic("ResourceRepositoryMock.FindByContainerFunc: method is nil but ResourceRepository.FindByContainer was just called")
 	}
@@ -239,7 +221,7 @@ func (mock *ResourceRepositoryMock) FindByContainerCalls() []struct {
 }
 
 // GetByID calls GetByIDFunc.
-func (mock *ResourceRepositoryMock) GetByID(ctx context.Context, id string) (*Resource, error) {
+func (mock *ResourceRepositoryMock) GetByID(ctx context.Context, id string) (entity.Resource, error) {
 	if mock.GetByIDFunc == nil {
 		panic("ResourceRepositoryMock.GetByIDFunc: method is nil but ResourceRepository.GetByID was just called")
 	}
@@ -275,7 +257,7 @@ func (mock *ResourceRepositoryMock) GetByIDCalls() []struct {
 }
 
 // GetByURI calls GetByURIFunc.
-func (mock *ResourceRepositoryMock) GetByURI(ctx context.Context, uri string) (*Resource, error) {
+func (mock *ResourceRepositoryMock) GetByURI(ctx context.Context, uri string) (entity.Resource, error) {
 	if mock.GetByURIFunc == nil {
 		panic("ResourceRepositoryMock.GetByURIFunc: method is nil but ResourceRepository.GetByURI was just called")
 	}
@@ -311,7 +293,7 @@ func (mock *ResourceRepositoryMock) GetByURICalls() []struct {
 }
 
 // List calls ListFunc.
-func (mock *ResourceRepositoryMock) List(ctx context.Context, limit int, offset int) ([]*Resource, error) {
+func (mock *ResourceRepositoryMock) List(ctx context.Context, limit int, offset int) ([]entity.Resource, error) {
 	if mock.ListFunc == nil {
 		panic("ResourceRepositoryMock.ListFunc: method is nil but ResourceRepository.List was just called")
 	}
@@ -350,38 +332,114 @@ func (mock *ResourceRepositoryMock) ListCalls() []struct {
 	return calls
 }
 
-// Update calls UpdateFunc.
-func (mock *ResourceRepositoryMock) Update(ctx context.Context, resource *Resource) error {
-	if mock.UpdateFunc == nil {
-		panic("ResourceRepositoryMock.UpdateFunc: method is nil but ResourceRepository.Update was just called")
+// LoadEvents calls LoadEventsFunc.
+func (mock *ResourceRepositoryMock) LoadEvents(ctx context.Context, aggregateID string) ([]domain.Event, error) {
+	if mock.LoadEventsFunc == nil {
+		panic("ResourceRepositoryMock.LoadEventsFunc: method is nil but ResourceRepository.LoadEvents was just called")
+	}
+	callInfo := struct {
+		Ctx         context.Context
+		AggregateID string
+	}{
+		Ctx:         ctx,
+		AggregateID: aggregateID,
+	}
+	mock.lockLoadEvents.Lock()
+	mock.calls.LoadEvents = append(mock.calls.LoadEvents, callInfo)
+	mock.lockLoadEvents.Unlock()
+	return mock.LoadEventsFunc(ctx, aggregateID)
+}
+
+// LoadEventsCalls gets all the calls that were made to LoadEvents.
+// Check the length with:
+//
+//	len(mockedResourceRepository.LoadEventsCalls())
+func (mock *ResourceRepositoryMock) LoadEventsCalls() []struct {
+	Ctx         context.Context
+	AggregateID string
+} {
+	var calls []struct {
+		Ctx         context.Context
+		AggregateID string
+	}
+	mock.lockLoadEvents.RLock()
+	calls = mock.calls.LoadEvents
+	mock.lockLoadEvents.RUnlock()
+	return calls
+}
+
+// LoadEventsFromVersion calls LoadEventsFromVersionFunc.
+func (mock *ResourceRepositoryMock) LoadEventsFromVersion(ctx context.Context, aggregateID string, version int) ([]domain.Event, error) {
+	if mock.LoadEventsFromVersionFunc == nil {
+		panic("ResourceRepositoryMock.LoadEventsFromVersionFunc: method is nil but ResourceRepository.LoadEventsFromVersion was just called")
+	}
+	callInfo := struct {
+		Ctx         context.Context
+		AggregateID string
+		Version     int
+	}{
+		Ctx:         ctx,
+		AggregateID: aggregateID,
+		Version:     version,
+	}
+	mock.lockLoadEventsFromVersion.Lock()
+	mock.calls.LoadEventsFromVersion = append(mock.calls.LoadEventsFromVersion, callInfo)
+	mock.lockLoadEventsFromVersion.Unlock()
+	return mock.LoadEventsFromVersionFunc(ctx, aggregateID, version)
+}
+
+// LoadEventsFromVersionCalls gets all the calls that were made to LoadEventsFromVersion.
+// Check the length with:
+//
+//	len(mockedResourceRepository.LoadEventsFromVersionCalls())
+func (mock *ResourceRepositoryMock) LoadEventsFromVersionCalls() []struct {
+	Ctx         context.Context
+	AggregateID string
+	Version     int
+} {
+	var calls []struct {
+		Ctx         context.Context
+		AggregateID string
+		Version     int
+	}
+	mock.lockLoadEventsFromVersion.RLock()
+	calls = mock.calls.LoadEventsFromVersion
+	mock.lockLoadEventsFromVersion.RUnlock()
+	return calls
+}
+
+// Save calls SaveFunc.
+func (mock *ResourceRepositoryMock) Save(ctx context.Context, resource entity.Resource) error {
+	if mock.SaveFunc == nil {
+		panic("ResourceRepositoryMock.SaveFunc: method is nil but ResourceRepository.Save was just called")
 	}
 	callInfo := struct {
 		Ctx      context.Context
-		Resource *Resource
+		Resource entity.Resource
 	}{
 		Ctx:      ctx,
 		Resource: resource,
 	}
-	mock.lockUpdate.Lock()
-	mock.calls.Update = append(mock.calls.Update, callInfo)
-	mock.lockUpdate.Unlock()
-	return mock.UpdateFunc(ctx, resource)
+	mock.lockSave.Lock()
+	mock.calls.Save = append(mock.calls.Save, callInfo)
+	mock.lockSave.Unlock()
+	return mock.SaveFunc(ctx, resource)
 }
 
-// UpdateCalls gets all the calls that were made to Update.
+// SaveCalls gets all the calls that were made to Save.
 // Check the length with:
 //
-//	len(mockedResourceRepository.UpdateCalls())
-func (mock *ResourceRepositoryMock) UpdateCalls() []struct {
+//	len(mockedResourceRepository.SaveCalls())
+func (mock *ResourceRepositoryMock) SaveCalls() []struct {
 	Ctx      context.Context
-	Resource *Resource
+	Resource entity.Resource
 } {
 	var calls []struct {
 		Ctx      context.Context
-		Resource *Resource
+		Resource entity.Resource
 	}
-	mock.lockUpdate.RLock()
-	calls = mock.calls.Update
-	mock.lockUpdate.RUnlock()
+	mock.lockSave.RLock()
+	calls = mock.calls.Save
+	mock.lockSave.RUnlock()
 	return calls
 }
